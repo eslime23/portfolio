@@ -1,0 +1,10 @@
+node_modules
+dist
+.DS_Store
+*.local
+*.tsbuildinfo
+.references
+public/assets/figma/bezel.png
+public/assets/figma/grok-bot.png
+public/assets/figma/notifications.png
+public/assets/figma/project-mark.png

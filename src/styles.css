@@ -1,0 +1,185 @@
+:root {
+  font-family: Inter, "Helvetica Neue", Arial, sans-serif;
+  color: #000;
+  background: #fff;
+  font-synthesis: none;
+  text-rendering: geometricPrecision;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  min-width: 320px;
+  overflow: hidden;
+}
+
+button,
+a {
+  color: inherit;
+  font: inherit;
+}
+
+.portfolio-shell {
+  position: relative;
+  width: 100%;
+  height: 100dvh;
+  min-height: 568px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.portfolio-header {
+  position: absolute;
+  z-index: 2;
+  inset: 20px 20px auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.identity {
+  width: 120px;
+}
+
+.identity p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+}
+
+.identity p + p {
+  margin-top: 8px;
+}
+
+.telegram-label {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+}
+
+.project-rail {
+  position: absolute;
+  top: calc(50% - 0.5px);
+  left: 50%;
+  display: flex;
+  width: 420px;
+  height: 1961px;
+  flex-direction: column;
+  gap: 16px;
+  transform: translate(-50%, -50%);
+}
+
+.project-card {
+  position: relative;
+  flex: 0 0 auto;
+  width: 420px;
+  overflow: hidden;
+  border-radius: 26px;
+  background: #f7f7f7;
+}
+
+.project-card img {
+  position: absolute;
+  display: block;
+  max-width: none;
+}
+
+.project-card--mark,
+.project-card--grok {
+  height: 420px;
+}
+
+.project-card--notifications {
+  height: 610px;
+}
+
+.project-card--bezel {
+  height: 463px;
+}
+
+.project-card--mark img,
+.project-card--bezel img {
+  display: none;
+}
+
+.project-card--grok img {
+  top: 145px;
+  left: 0;
+  width: 420px;
+  height: 275px;
+}
+
+.project-card--notifications img {
+  top: 0;
+  left: 0;
+  width: 420px;
+  height: 509px;
+}
+
+.section-toggle {
+  position: absolute;
+  z-index: 3;
+  bottom: 14px;
+  left: 50%;
+  display: flex;
+  width: 168px;
+  height: 68px;
+  gap: 10px;
+  padding: 4px;
+  overflow: hidden;
+  border: 1px solid #fbfbfb;
+  border-radius: 120px;
+  background: #fff;
+  box-shadow: 6px 7px 15px rgb(0 0 0 / 4%);
+  transform: translateX(-50%);
+}
+
+.section-toggle button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 75px;
+  height: 60px;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 120px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+}
+
+.section-toggle button.is-active {
+  background: #f5f5f5;
+}
+
+.section-toggle button:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 2px;
+}
+
+@media (max-width: 479px) {
+  .project-rail {
+    transform: translate(-50%, -50%) scale(0.86);
+  }
+
+  .portfolio-header {
+    inset-inline: 16px;
+  }
+}
