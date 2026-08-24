@@ -45,6 +45,7 @@ a {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  pointer-events: none;
 }
 
 .identity {
@@ -71,63 +72,56 @@ a {
   letter-spacing: -0.04em;
 }
 
-.project-rail {
+.project-feed {
   position: absolute;
-  top: calc(50% - 0.5px);
-  left: 50%;
+  z-index: 1;
+  inset: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.project-feed::-webkit-scrollbar {
+  display: none;
+}
+
+.project-feed:focus {
+  outline: none;
+}
+
+.project-rail {
   display: flex;
-  width: 420px;
-  height: 1961px;
+  min-height: 100%;
   flex-direction: column;
-  gap: 16px;
-  transform: translate(-50%, -50%);
+  align-items: center;
+}
+
+.project-feed__spacer {
+  width: 1px;
+  flex: 0 0 auto;
 }
 
 .project-card {
   position: relative;
+  width: var(--card-width);
+  height: var(--card-height);
   flex: 0 0 auto;
-  width: 420px;
   overflow: hidden;
-  border-radius: 26px;
-  background: #f7f7f7;
+  border-radius: var(--card-radius);
+  background: var(--card-background);
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
 }
 
 .project-card img {
   position: absolute;
   display: block;
   max-width: none;
-}
-
-.project-card--mark,
-.project-card--grok {
-  height: 420px;
-}
-
-.project-card--notifications {
-  height: 610px;
-}
-
-.project-card--bezel {
-  height: 463px;
-}
-
-.project-card--mark img,
-.project-card--bezel img {
-  display: none;
-}
-
-.project-card--grok img {
-  top: 145px;
-  left: 0;
-  width: 420px;
-  height: 275px;
-}
-
-.project-card--notifications img {
-  top: 0;
-  left: 0;
-  width: 420px;
-  height: 509px;
+  user-select: none;
 }
 
 .section-toggle {
@@ -175,11 +169,17 @@ a {
 }
 
 @media (max-width: 479px) {
-  .project-rail {
-    transform: translate(-50%, -50%) scale(0.86);
+  .project-card {
+    transform: scale(0.86);
   }
 
   .portfolio-header {
     inset-inline: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-feed {
+    scroll-behavior: auto;
   }
 }
