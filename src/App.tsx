@@ -1,30 +1,48 @@
 import { CardFeed } from './cards/CardFeed'
 import { getPublishedCards } from './cards/registry'
+import { GradualBlur } from './components/GradualBlur'
 
 const designCards = getPublishedCards('design')
+const feedBlurProps = {
+  target: 'parent' as const,
+  height: '6rem',
+  strength: 2,
+  divCount: 5,
+  curve: 'bezier' as const,
+  exponential: true,
+  opacity: 1,
+  zIndex: 2,
+}
 
 export function App() {
   return (
     <main className="portfolio-shell">
-      <header className="portfolio-header">
-        <div className="identity">
-          <p>Nikitin Anton</p>
-          <p>Design engineer at&nbsp;GigaChat</p>
-        </div>
+      <div className="feed-stage">
+        <CardFeed cards={designCards} label="Design projects" />
 
-        <p className="telegram-label">Telegram</p>
-      </header>
+        <GradualBlur {...feedBlurProps} position="top" />
+        <GradualBlur {...feedBlurProps} position="bottom" />
+      </div>
 
-      <CardFeed cards={designCards} label="Design projects" />
+      <div className="portfolio-ui">
+        <header className="portfolio-header">
+          <div className="identity">
+            <p>Nikitin Anton</p>
+            <p>Design engineer at&nbsp;GigaChat</p>
+          </div>
 
-      <nav className="section-toggle" aria-label="Portfolio sections">
-        <button className="is-active" type="button" aria-pressed="true">
-          Design
-        </button>
-        <button type="button" aria-pressed="false">
-          Fun
-        </button>
-      </nav>
+          <p className="telegram-label">Telegram</p>
+        </header>
+
+        <nav className="section-toggle" aria-label="Portfolio sections">
+          <button className="is-active" type="button" aria-pressed="true">
+            Design
+          </button>
+          <button type="button" aria-pressed="false">
+            Fun
+          </button>
+        </nav>
+      </div>
     </main>
   )
 }

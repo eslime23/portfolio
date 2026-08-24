@@ -40,7 +40,7 @@ a {
 
 .portfolio-header {
   position: absolute;
-  z-index: 2;
+  z-index: 1;
   inset: 20px 20px auto;
   display: flex;
   align-items: flex-start;
@@ -70,6 +70,25 @@ a {
   font-weight: 400;
   line-height: 1.2;
   letter-spacing: -0.04em;
+}
+
+.feed-stage {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  contain: paint;
+  isolation: isolate;
+}
+
+.portfolio-ui {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  contain: paint;
+  isolation: isolate;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  pointer-events: none;
 }
 
 .project-feed {
@@ -132,7 +151,7 @@ a {
 
 .section-toggle {
   position: absolute;
-  z-index: 3;
+  z-index: 2;
   bottom: 14px;
   left: 50%;
   display: flex;
@@ -146,6 +165,7 @@ a {
   background: #fff;
   box-shadow: 6px 7px 15px rgb(0 0 0 / 4%);
   transform: translateX(-50%);
+  pointer-events: auto;
 }
 
 .section-toggle button {
