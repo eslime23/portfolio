@@ -92,10 +92,6 @@ export function GradualBlur({
   const containerStyle: CSSProperties = {
     position: target === 'page' ? 'fixed' : 'absolute',
     zIndex,
-    overflow: 'hidden',
-    clipPath: 'inset(0)',
-    transform: 'translateZ(0)',
-    backfaceVisibility: 'hidden',
     pointerEvents: 'none',
     ...(isVertical
       ? {
