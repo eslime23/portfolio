@@ -12,3 +12,5 @@ To add a card:
 3. Set `status: 'published'` when the card is ready for the feed.
 
 Cards with `status: 'draft'` stay in storage but are not rendered. The feed accepts different card sizes and calculates the first and last snap offsets automatically.
+
+Snap animation parameters live in `src/cards/motion.ts`. The spring is enabled only for wheel and touch scrolling; keyboard navigation and reduced-motion mode remain instant.

@@ -105,16 +105,22 @@ a {
   flex: 0 0 auto;
 }
 
-.project-card {
-  position: relative;
+.project-card-snap {
   width: var(--card-width);
   height: var(--card-height);
   flex: 0 0 auto;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+}
+
+.project-card {
+  position: relative;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
   border-radius: var(--card-radius);
   background: var(--card-background);
-  scroll-snap-align: center;
-  scroll-snap-stop: always;
+  transform-origin: center;
 }
 
 .project-card img {
@@ -169,7 +175,7 @@ a {
 }
 
 @media (max-width: 479px) {
-  .project-card {
+  .project-card-snap {
     transform: scale(0.86);
   }
 

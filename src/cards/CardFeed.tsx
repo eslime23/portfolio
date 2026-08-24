@@ -5,6 +5,8 @@ import {
   type CSSProperties,
   type KeyboardEvent,
 } from 'react'
+import { motion, useReducedMotion } from 'motion/react'
+import { cardSnapMotion } from './motion'
 import type { PortfolioCard } from './types'
 
 interface CardFeedProps {
@@ -50,10 +52,14 @@ function getAssetStyle(card: PortfolioCard): CSSProperties {
 }
 
 export function CardFeed({ cards, label }: CardFeedProps) {
+  const reduceMotion = useReducedMotion()
   const feedRef = useRef<HTMLElement>(null)
   const cardRefs = useRef(new Map<string, HTMLElement>())
   const scrollFrame = useRef<number | null>(null)
   const [activeCardId, setActiveCardId] = useState(cards[0]?.id)
+  const [interactionMode, setInteractionMode] = useState<'gesture' | 'keyboard'>(
+    'gesture',
+  )
 
   const updateActiveCard = useCallback(() => {
     const feed = feedRef.current
@@ -91,13 +97,13 @@ export function CardFeed({ cards, label }: CardFeedProps) {
   }, [updateActiveCard])
 
   const scrollToCard = useCallback(
-    (index: number) => {
+    (index: number, behavior: ScrollBehavior = 'smooth') => {
       const card = cards[Math.max(0, Math.min(index, cards.length - 1))]
 
       if (!card) return
 
       cardRefs.current.get(card.id)?.scrollIntoView({
-        behavior: 'smooth',
+        behavior,
         block: 'center',
       })
     },
@@ -105,6 +111,7 @@ export function CardFeed({ cards, label }: CardFeedProps) {
   )
 
   const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    const instant = 'instant' as ScrollBehavior
     const currentIndex = Math.max(
       0,
       cards.findIndex((card) => card.id === activeCardId),
@@ -112,22 +119,26 @@ export function CardFeed({ cards, label }: CardFeedProps) {
 
     if (event.key === 'ArrowDown' || event.key === 'PageDown') {
       event.preventDefault()
-      scrollToCard(currentIndex + 1)
+      setInteractionMode('keyboard')
+      scrollToCard(currentIndex + 1, instant)
     }
 
     if (event.key === 'ArrowUp' || event.key === 'PageUp') {
       event.preventDefault()
-      scrollToCard(currentIndex - 1)
+      setInteractionMode('keyboard')
+      scrollToCard(currentIndex - 1, instant)
     }
 
     if (event.key === 'Home') {
       event.preventDefault()
-      scrollToCard(0)
+      setInteractionMode('keyboard')
+      scrollToCard(0, instant)
     }
 
     if (event.key === 'End') {
       event.preventDefault()
-      scrollToCard(cards.length - 1)
+      setInteractionMode('keyboard')
+      scrollToCard(cards.length - 1, instant)
     }
   }
 
@@ -144,6 +155,8 @@ export function CardFeed({ cards, label }: CardFeedProps) {
       tabIndex={0}
       onKeyDown={handleKeyDown}
       onScroll={handleScroll}
+      onTouchStart={() => setInteractionMode('gesture')}
+      onWheel={() => setInteractionMode('gesture')}
     >
       <div className="project-rail">
         <div
@@ -154,33 +167,54 @@ export function CardFeed({ cards, label }: CardFeedProps) {
           aria-hidden="true"
         />
 
-        {cards.map((card, index) => (
-          <article
-            ref={(element) => {
-              if (element) cardRefs.current.set(card.id, element)
-              else cardRefs.current.delete(card.id)
-            }}
-            className="project-card"
-            style={{
-              ...getCardStyle(card),
-              marginBottom: index === cards.length - 1 ? 0 : 16,
-            }}
-            key={card.id}
-            data-card-id={card.id}
-            aria-current={activeCardId === card.id ? 'true' : undefined}
-            aria-label={`${index + 1} of ${cards.length}: ${card.title}`}
-          >
-            {card.asset ? (
-              <img
-                src={card.asset.src}
-                alt={card.asset.alt}
-                style={getAssetStyle(card)}
-                draggable="false"
-                loading={index < 2 ? 'eager' : 'lazy'}
-              />
-            ) : null}
-          </article>
-        ))}
+        {cards.map((card, index) => {
+          const springEnabled = !reduceMotion && interactionMode === 'gesture'
+          const isActive = activeCardId === card.id
+
+          return (
+            <div
+              ref={(element) => {
+                if (element) cardRefs.current.set(card.id, element)
+                else cardRefs.current.delete(card.id)
+              }}
+              className="project-card-snap"
+              style={{
+                ...getCardStyle(card),
+                marginBottom: index === cards.length - 1 ? 0 : 16,
+              }}
+              key={card.id}
+              data-card-id={card.id}
+            >
+              <motion.article
+                className="project-card"
+                initial={false}
+                animate={{
+                  transform:
+                    springEnabled && !isActive
+                      ? cardSnapMotion.inactiveTransform
+                      : cardSnapMotion.activeTransform,
+                }}
+                transition={
+                  springEnabled
+                    ? cardSnapMotion.spring
+                    : cardSnapMotion.instant
+                }
+                aria-current={isActive ? 'true' : undefined}
+                aria-label={`${index + 1} of ${cards.length}: ${card.title}`}
+              >
+                {card.asset ? (
+                  <img
+                    src={card.asset.src}
+                    alt={card.asset.alt}
+                    style={getAssetStyle(card)}
+                    draggable="false"
+                    loading={index < 2 ? 'eager' : 'lazy'}
+                  />
+                ) : null}
+              </motion.article>
+            </div>
+          )
+        })}
 
         <div
           className="project-feed__spacer"
