@@ -8,10 +8,10 @@ Each portfolio card has two parts:
 To add a card:
 
 1. Create `public/cards/<card-id>/` and place the exported asset there.
-2. Add one entry to `cardRegistry` with its width, height, radius, order and section.
+2. Add one entry to `cardRegistry` with its width, height, radius, order and section. Use `kind: 'video'` for MP4 assets; images are the default.
 3. Set `status: 'published'` when the card is ready for the feed.
 
-Cards with `status: 'draft'` stay in storage but are not rendered. The feed accepts different card sizes and calculates the first and last snap offsets automatically.
+Cards with `status: 'draft'` stay in storage but are not rendered. Published cards are sorted by `order` from highest to lowest, so the latest card appears at the top. The feed accepts different card sizes and calculates the first and last snap offsets automatically.
 
 ## Centered card rule
 

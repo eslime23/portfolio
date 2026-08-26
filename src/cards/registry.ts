@@ -26,6 +26,7 @@ function getCenteredCardLayout(contentWidth: number, contentHeight: number) {
 }
 
 const phonePreviewLayout = getCenteredCardLayout(219, 439)
+const videoPreviewLayout = getCenteredCardLayout(420, (174 / 620) * 420)
 
 const cards = [
   {
@@ -152,6 +153,27 @@ const cards = [
       url: `${figmaFileUrl}?node-id=108-4508`,
     },
   },
+  {
+    id: 'video-test',
+    title: 'Video test',
+    section: 'design',
+    status: 'published',
+    order: 70,
+    width: videoPreviewLayout.width,
+    height: videoPreviewLayout.height,
+    radius: 26,
+    background: '#f7f7f7',
+    asset: {
+      src: '/cards/video-test/preview.mp4',
+      alt: 'Video test',
+      kind: 'video',
+      placement: videoPreviewLayout.placement,
+      fit: 'fill',
+    },
+    source: {
+      type: 'file',
+    },
+  },
 ] satisfies PortfolioCard[]
 
 function validateRegistry(registry: PortfolioCard[]) {
@@ -177,5 +199,5 @@ export const cardRegistry = validateRegistry(cards)
 export function getPublishedCards(section: CardSection) {
   return cardRegistry
     .filter((card) => card.section === section && card.status === 'published')
-    .sort((a, b) => a.order - b.order)
+    .sort((a, b) => b.order - a.order)
 }

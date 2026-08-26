@@ -12,6 +12,7 @@ export interface CardAssetPlacement {
 export interface CardAsset {
   src: string
   alt: string
+  kind?: 'image' | 'video'
   placement?: CardAssetPlacement
   fit?: 'contain' | 'cover' | 'fill'
 }

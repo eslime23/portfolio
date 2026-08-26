@@ -202,7 +202,18 @@ export function CardFeed({ cards, label }: CardFeedProps) {
                 aria-current={isActive ? 'true' : undefined}
                 aria-label={`${index + 1} of ${cards.length}: ${card.title}`}
               >
-                {card.asset ? (
+                {card.asset?.kind === 'video' ? (
+                  <video
+                    src={card.asset.src}
+                    aria-label={card.asset.alt}
+                    style={getAssetStyle(card)}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload={index < 2 ? 'auto' : 'metadata'}
+                  />
+                ) : card.asset ? (
                   <img
                     src={card.asset.src}
                     alt={card.asset.alt}

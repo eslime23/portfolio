@@ -142,11 +142,16 @@ a {
   transform-origin: center;
 }
 
-.project-card img {
+.project-card img,
+.project-card video {
   position: absolute;
   display: block;
   max-width: none;
   user-select: none;
+}
+
+.project-card video {
+  pointer-events: none;
 }
 
 .section-toggle {
