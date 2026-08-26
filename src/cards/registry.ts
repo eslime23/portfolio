@@ -3,6 +3,30 @@ import type { CardSection, PortfolioCard } from './types'
 const figmaFileUrl =
   'https://www.figma.com/design/fHMqMAt4880w3H3neTRiuZ/1st-text'
 
+const baseCardWidth = 420
+const minimumCardHeight = 420
+const cardVerticalPadding = 40
+
+function getCenteredCardLayout(contentWidth: number, contentHeight: number) {
+  const height = Math.max(
+    minimumCardHeight,
+    contentHeight + cardVerticalPadding * 2,
+  )
+
+  return {
+    width: baseCardWidth,
+    height,
+    placement: {
+      x: (baseCardWidth - contentWidth) / 2,
+      y: (height - contentHeight) / 2,
+      width: contentWidth,
+      height: contentHeight,
+    },
+  }
+}
+
+const phonePreviewLayout = getCenteredCardLayout(219, 439)
+
 const cards = [
   {
     id: 'project-mark',
@@ -69,11 +93,51 @@ const cards = [
     },
   },
   {
+    id: 'iphone-frame',
+    title: 'iPhone frame',
+    section: 'design',
+    status: 'published',
+    order: 40,
+    width: phonePreviewLayout.width,
+    height: phonePreviewLayout.height,
+    radius: 26,
+    background: '#f7f7f7',
+    asset: {
+      src: '/cards/iphone-frame/preview.png',
+      alt: 'Black iPhone frame',
+      placement: phonePreviewLayout.placement,
+      fit: 'fill',
+    },
+    source: {
+      type: 'file',
+    },
+  },
+  {
+    id: 'green-map',
+    title: 'Green map',
+    section: 'design',
+    status: 'published',
+    order: 50,
+    width: phonePreviewLayout.width,
+    height: phonePreviewLayout.height,
+    radius: 26,
+    background: '#f7f7f7',
+    asset: {
+      src: '/cards/green-map/preview.png',
+      alt: 'Green map iPhone interface',
+      placement: phonePreviewLayout.placement,
+      fit: 'fill',
+    },
+    source: {
+      type: 'file',
+    },
+  },
+  {
     id: 'bezel',
     title: 'Bezel',
     section: 'design',
     status: 'draft',
-    order: 40,
+    order: 60,
     width: 420,
     height: 463,
     radius: 26,
