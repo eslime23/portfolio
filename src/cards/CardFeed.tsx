@@ -1,5 +1,6 @@
 import {
   useCallback,
+  useEffect,
   useRef,
   useState,
   type CSSProperties,
@@ -56,7 +57,9 @@ export function CardFeed({ cards, label }: CardFeedProps) {
   const feedRef = useRef<HTMLElement>(null)
   const cardRefs = useRef(new Map<string, HTMLElement>())
   const scrollFrame = useRef<number | null>(null)
+  const scrollEndTimer = useRef<number | null>(null)
   const [activeCardId, setActiveCardId] = useState(cards[0]?.id)
+  const [isScrolling, setIsScrolling] = useState(false)
   const [interactionMode, setInteractionMode] = useState<'gesture' | 'keyboard'>(
     'gesture',
   )
@@ -87,14 +90,44 @@ export function CardFeed({ cards, label }: CardFeedProps) {
     if (closestId) setActiveCardId(closestId)
   }, [cards])
 
+  const finishScroll = useCallback(() => {
+    if (scrollEndTimer.current !== null) {
+      window.clearTimeout(scrollEndTimer.current)
+      scrollEndTimer.current = null
+    }
+
+    updateActiveCard()
+    setIsScrolling(false)
+  }, [updateActiveCard])
+
   const handleScroll = useCallback(() => {
+    setIsScrolling(true)
+
+    if (scrollEndTimer.current !== null) {
+      window.clearTimeout(scrollEndTimer.current)
+    }
+
+    scrollEndTimer.current = window.setTimeout(finishScroll, 140)
+
     if (scrollFrame.current !== null) return
 
     scrollFrame.current = requestAnimationFrame(() => {
       updateActiveCard()
       scrollFrame.current = null
     })
-  }, [updateActiveCard])
+  }, [finishScroll, updateActiveCard])
+
+  useEffect(() => {
+    return () => {
+      if (scrollFrame.current !== null) {
+        cancelAnimationFrame(scrollFrame.current)
+      }
+
+      if (scrollEndTimer.current !== null) {
+        window.clearTimeout(scrollEndTimer.current)
+      }
+    }
+  }, [])
 
   const scrollToCard = useCallback(
     (index: number, behavior: ScrollBehavior = 'smooth') => {
@@ -155,6 +188,7 @@ export function CardFeed({ cards, label }: CardFeedProps) {
       tabIndex={0}
       onKeyDown={handleKeyDown}
       onScroll={handleScroll}
+      onScrollEnd={finishScroll}
       onTouchStart={() => setInteractionMode('gesture')}
       onWheel={() => setInteractionMode('gesture')}
     >
@@ -168,7 +202,7 @@ export function CardFeed({ cards, label }: CardFeedProps) {
         />
 
         {cards.map((card, index) => {
-          const springEnabled = !reduceMotion && interactionMode === 'gesture'
+          const motionEnabled = !reduceMotion && interactionMode === 'gesture'
           const isActive = activeCardId === card.id
 
           return (
@@ -190,13 +224,15 @@ export function CardFeed({ cards, label }: CardFeedProps) {
                 initial={false}
                 animate={{
                   transform:
-                    springEnabled && !isActive
-                      ? cardSnapMotion.inactiveTransform
+                    motionEnabled && isScrolling && isActive
+                      ? cardSnapMotion.scrollingTransform
                       : cardSnapMotion.activeTransform,
                 }}
                 transition={
-                  springEnabled
-                    ? cardSnapMotion.spring
+                  motionEnabled
+                    ? isScrolling
+                      ? cardSnapMotion.tracking
+                      : cardSnapMotion.settle
                     : cardSnapMotion.instant
                 }
                 aria-current={isActive ? 'true' : undefined}
