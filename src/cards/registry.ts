@@ -94,26 +94,6 @@ const cards = [
     },
   },
   {
-    id: 'iphone-frame',
-    title: 'iPhone frame',
-    section: 'design',
-    status: 'published',
-    order: 40,
-    width: phonePreviewLayout.width,
-    height: phonePreviewLayout.height,
-    radius: 26,
-    background: '#f7f7f7',
-    asset: {
-      src: '/cards/iphone-frame/preview.png',
-      alt: 'Black iPhone frame',
-      placement: phonePreviewLayout.placement,
-      fit: 'fill',
-    },
-    source: {
-      type: 'file',
-    },
-  },
-  {
     id: 'green-map',
     title: 'Green map',
     section: 'design',
