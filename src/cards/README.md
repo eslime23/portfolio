@@ -15,6 +15,12 @@ Cards with `status: 'draft'` stay in storage but are not rendered. Published car
 
 ## Card content bounds
 
-The base card is 420px wide with a minimum height of 420px. Content keeps at least 40px of space on the left and right. Wider assets are scaled down proportionally and remain centered; narrower assets keep their original size. Centered assets also use 40px of vertical padding, so their card height is calculated as `max(420px, fitted asset height + 80px)`.
+The base card is 420px wide with a minimum height of 420px. Content keeps at least 40px of space on the left and right. Wider assets are scaled down proportionally and remain centered; narrower assets keep their original size.
+
+Set `asset.verticalAlign` when adding a card:
+
+- `center` (default): 40px top and bottom; card height is `max(420px, fitted asset height + 80px)`.
+- `top`: no top offset; content is flush with the top and the height is `max(420px, fitted asset height + 40px)`. Use this when the request says `верх`.
+- `bottom`: no bottom offset; content is flush with the bottom and the height is `max(420px, fitted asset height + 40px)`. Use this when the request says `низ`.
 
 Snap animation parameters live in `src/cards/motion.ts`. While the feed moves, the closest card uses a short retargetable transition; the spring runs only after scrolling settles. Keyboard navigation and reduced-motion mode remain instant.

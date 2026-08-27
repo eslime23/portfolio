@@ -1,38 +1,28 @@
-import type { CardSection, PortfolioCard } from './types'
-import { fitContentToCardWidth } from './layout'
+import type { CardSection, CardVerticalAlign, PortfolioCard } from './types'
+import { getCardContentLayout as createCardContentLayout } from './layout'
 
 const figmaFileUrl =
   'https://www.figma.com/design/fHMqMAt4880w3H3neTRiuZ/1st-text'
 
 const baseCardWidth = 420
 const minimumCardHeight = 420
-const cardVerticalPadding = 40
 
-function getCenteredCardLayout(contentWidth: number, contentHeight: number) {
-  const fittedContent = fitContentToCardWidth(
-    baseCardWidth,
+function getCardContentLayout(
+  contentWidth: number,
+  contentHeight: number,
+  verticalAlign: CardVerticalAlign = 'center',
+) {
+  return createCardContentLayout({
+    cardWidth: baseCardWidth,
+    minimumCardHeight,
     contentWidth,
     contentHeight,
-  )
-  const height = Math.max(
-    minimumCardHeight,
-    fittedContent.height + cardVerticalPadding * 2,
-  )
-
-  return {
-    width: baseCardWidth,
-    height,
-    placement: {
-      x: (baseCardWidth - fittedContent.width) / 2,
-      y: (height - fittedContent.height) / 2,
-      width: fittedContent.width,
-      height: fittedContent.height,
-    },
-  }
+    verticalAlign,
+  })
 }
 
-const phonePreviewLayout = getCenteredCardLayout(219, 439)
-const videoPreviewLayout = getCenteredCardLayout(420, (174 / 620) * 420)
+const phonePreviewLayout = getCardContentLayout(219, 439)
+const videoPreviewLayout = getCardContentLayout(420, (174 / 620) * 420)
 
 const cards = [
   {

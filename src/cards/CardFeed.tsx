@@ -43,9 +43,16 @@ function getAssetStyle(card: PortfolioCard): CSSProperties {
     card.width,
     sourcePlacement,
   )
+  const verticalAlign = card.asset?.verticalAlign
+  const top =
+    verticalAlign === 'top'
+      ? 0
+      : verticalAlign === 'bottom'
+        ? card.height - placement.height
+        : placement.y
 
   return {
-    top: placement.y,
+    top,
     left: placement.x,
     width: placement.width,
     height: placement.height,

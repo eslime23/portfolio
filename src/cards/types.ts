@@ -2,6 +2,8 @@ export type CardSection = 'design' | 'fun'
 
 export type CardStatus = 'draft' | 'published'
 
+export type CardVerticalAlign = 'top' | 'center' | 'bottom'
+
 export interface CardAssetPlacement {
   x: number
   y: number
@@ -13,6 +15,7 @@ export interface CardAsset {
   src: string
   alt: string
   kind?: 'image' | 'video'
+  verticalAlign?: CardVerticalAlign
   placement?: CardAssetPlacement
   fit?: 'contain' | 'cover' | 'fill'
 }

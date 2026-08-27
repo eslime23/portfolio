@@ -1,6 +1,15 @@
-import type { CardAssetPlacement } from './types'
+import type { CardAssetPlacement, CardVerticalAlign } from './types'
 
 export const cardHorizontalPadding = 40
+export const cardVerticalPadding = 40
+
+interface CardContentLayoutOptions {
+  cardWidth: number
+  minimumCardHeight: number
+  contentWidth: number
+  contentHeight: number
+  verticalAlign?: CardVerticalAlign
+}
 
 export function fitContentToCardWidth(
   cardWidth: number,
@@ -19,6 +28,42 @@ export function fitContentToCardWidth(
   return {
     width: contentWidth * scale,
     height: contentHeight * scale,
+  }
+}
+
+export function getCardContentLayout({
+  cardWidth,
+  minimumCardHeight,
+  contentWidth,
+  contentHeight,
+  verticalAlign = 'center',
+}: CardContentLayoutOptions) {
+  const fittedContent = fitContentToCardWidth(
+    cardWidth,
+    contentWidth,
+    contentHeight,
+  )
+  const verticalPadding =
+    verticalAlign === 'center'
+      ? cardVerticalPadding * 2
+      : cardVerticalPadding
+  const height = Math.max(minimumCardHeight, fittedContent.height + verticalPadding)
+  const y =
+    verticalAlign === 'top'
+      ? 0
+      : verticalAlign === 'bottom'
+        ? height - fittedContent.height
+        : (height - fittedContent.height) / 2
+
+  return {
+    width: cardWidth,
+    height,
+    placement: {
+      x: (cardWidth - fittedContent.width) / 2,
+      y,
+      width: fittedContent.width,
+      height: fittedContent.height,
+    },
   }
 }
 

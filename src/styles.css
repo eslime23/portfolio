@@ -151,7 +151,7 @@ a {
   max-width: none;
   transform: scale(1);
   transform-origin: center;
-  transition: transform 300ms var(--ease-out);
+  transition: transform 400ms var(--ease-out);
   user-select: none;
   will-change: transform;
 }
@@ -163,7 +163,7 @@ a {
 @media (hover: hover) and (pointer: fine) {
   .project-card:hover img,
   .project-card:hover video {
-    transform: scale(1.02);
+    transform: scale(1.01);
   }
 }
 
