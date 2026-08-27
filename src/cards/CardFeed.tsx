@@ -7,6 +7,7 @@ import {
   type KeyboardEvent,
 } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
+import { constrainPlacementToCardWidth } from './layout'
 import { cardSnapMotion } from './motion'
 import type { PortfolioCard } from './types'
 
@@ -32,23 +33,23 @@ function getCardStyle(card: PortfolioCard): CardStyle {
 }
 
 function getAssetStyle(card: PortfolioCard): CSSProperties {
-  const placement = card.asset?.placement
-
-  if (!placement) {
-    return {
-      inset: 0,
-      width: '100%',
-      height: '100%',
-      objectFit: card.asset?.fit ?? 'cover',
-    }
+  const sourcePlacement = card.asset?.placement ?? {
+    x: 0,
+    y: 0,
+    width: card.width,
+    height: card.height,
   }
+  const placement = constrainPlacementToCardWidth(
+    card.width,
+    sourcePlacement,
+  )
 
   return {
     top: placement.y,
     left: placement.x,
     width: placement.width,
     height: placement.height,
-    objectFit: card.asset?.fit ?? 'fill',
+    objectFit: card.asset?.fit ?? 'cover',
   }
 }
 

@@ -13,8 +13,8 @@ To add a card:
 
 Cards with `status: 'draft'` stay in storage but are not rendered. Published cards are sorted by `order` from highest to lowest, so the latest card appears at the top. The feed accepts different card sizes and calculates the first and last snap offsets automatically.
 
-## Centered card rule
+## Card content bounds
 
-The base card is 420px wide with a minimum height of 420px. Centered assets use 40px of vertical padding, so their card height is calculated as `max(420px, asset height + 80px)`. The asset placement is calculated from the card and asset dimensions to keep it centered on both axes.
+The base card is 420px wide with a minimum height of 420px. Content keeps at least 40px of space on the left and right. Wider assets are scaled down proportionally and remain centered; narrower assets keep their original size. Centered assets also use 40px of vertical padding, so their card height is calculated as `max(420px, fitted asset height + 80px)`.
 
 Snap animation parameters live in `src/cards/motion.ts`. While the feed moves, the closest card uses a short retargetable transition; the spring runs only after scrolling settles. Keyboard navigation and reduced-motion mode remain instant.

@@ -1,4 +1,5 @@
 import type { CardSection, PortfolioCard } from './types'
+import { fitContentToCardWidth } from './layout'
 
 const figmaFileUrl =
   'https://www.figma.com/design/fHMqMAt4880w3H3neTRiuZ/1st-text'
@@ -8,19 +9,24 @@ const minimumCardHeight = 420
 const cardVerticalPadding = 40
 
 function getCenteredCardLayout(contentWidth: number, contentHeight: number) {
+  const fittedContent = fitContentToCardWidth(
+    baseCardWidth,
+    contentWidth,
+    contentHeight,
+  )
   const height = Math.max(
     minimumCardHeight,
-    contentHeight + cardVerticalPadding * 2,
+    fittedContent.height + cardVerticalPadding * 2,
   )
 
   return {
     width: baseCardWidth,
     height,
     placement: {
-      x: (baseCardWidth - contentWidth) / 2,
-      y: (height - contentHeight) / 2,
-      width: contentWidth,
-      height: contentHeight,
+      x: (baseCardWidth - fittedContent.width) / 2,
+      y: (height - fittedContent.height) / 2,
+      width: fittedContent.width,
+      height: fittedContent.height,
     },
   }
 }
