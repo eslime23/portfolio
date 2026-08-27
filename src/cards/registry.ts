@@ -23,6 +23,7 @@ function getCardContentLayout(
 
 const phonePreviewLayout = getCardContentLayout(219, 439)
 const videoPreviewLayout = getCardContentLayout(420, (174 / 620) * 420)
+const bezelAgentsLayout = getCardContentLayout(876, 1348, 'bottom')
 
 const cards = [
   {
@@ -144,6 +145,27 @@ const cards = [
       alt: 'Video test',
       kind: 'video',
       placement: videoPreviewLayout.placement,
+      fit: 'fill',
+    },
+    source: {
+      type: 'file',
+    },
+  },
+  {
+    id: 'bezel-agents',
+    title: 'Active agents',
+    section: 'design',
+    status: 'published',
+    order: 80,
+    width: bezelAgentsLayout.width,
+    height: bezelAgentsLayout.height,
+    radius: 26,
+    background: '#f7f7f7',
+    asset: {
+      src: '/cards/bezel-agents/preview.png',
+      alt: 'Active agents dashboard in an iPhone frame',
+      verticalAlign: 'bottom',
+      placement: bezelAgentsLayout.placement,
       fit: 'fill',
     },
     source: {
