@@ -27,19 +27,21 @@ export function App() {
       <div className="portfolio-ui">
         <header className="portfolio-header">
           <div className="identity">
-            <p>Nikitin Anton</p>
-            <p>Design engineer at&nbsp;GigaChat</p>
+            <p className="intro-text intro-text--1">Nikitin Anton</p>
+            <p className="intro-text intro-text--2">
+              Design engineer at&nbsp;GigaChat
+            </p>
           </div>
 
-          <p className="telegram-label">Telegram</p>
+          <p className="telegram-label intro-text intro-text--3">Telegram</p>
         </header>
 
         <nav className="section-toggle" aria-label="Portfolio sections">
           <button className="is-active" type="button" aria-pressed="true">
-            Design
+            <span className="intro-text intro-text--4">Design</span>
           </button>
           <button type="button" aria-pressed="false">
-            Fun
+            <span className="intro-text intro-text--5">Fun</span>
           </button>
         </nav>
       </div>
