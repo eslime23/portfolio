@@ -142,7 +142,12 @@ a {
   border-radius: var(--card-radius);
   background: var(--card-background);
   transform-origin: center;
+  transition: transform 160ms var(--ease-out);
   will-change: transform;
+}
+
+.project-feed[data-scrolling='true'] .project-card {
+  transform: scale(0.99);
 }
 
 .project-card img,
@@ -231,7 +236,8 @@ a {
   .project-card img,
   .project-card video,
   .project-card:hover img,
-  .project-card:hover video {
+  .project-card:hover video,
+  .project-feed[data-scrolling='true'] .project-card {
     transform: scale(1);
     transition: none;
   }

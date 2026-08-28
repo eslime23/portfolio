@@ -1,5 +1,6 @@
 import {
   useCallback,
+  useEffect,
   useRef,
   useState,
   type CSSProperties,
@@ -61,6 +62,7 @@ export function CardFeed({ cards, label }: CardFeedProps) {
   const feedRef = useRef<HTMLElement>(null)
   const cardRefs = useRef(new Map<string, HTMLElement>())
   const scrollFrame = useRef<number | null>(null)
+  const scrollEndTimer = useRef<number | null>(null)
   const [activeCardId, setActiveCardId] = useState(cards[0]?.id)
 
   const updateActiveCard = useCallback(() => {
@@ -90,6 +92,23 @@ export function CardFeed({ cards, label }: CardFeedProps) {
   }, [cards])
 
   const handleScroll = useCallback(() => {
+    const feed = feedRef.current
+
+    if (feed && !feed.hasAttribute('data-scrolling')) {
+      feed.setAttribute('data-scrolling', 'true')
+    }
+
+    if (feed && !('onscrollend' in (feed as object))) {
+      if (scrollEndTimer.current !== null) {
+        window.clearTimeout(scrollEndTimer.current)
+      }
+
+      scrollEndTimer.current = window.setTimeout(() => {
+        feed.removeAttribute('data-scrolling')
+        scrollEndTimer.current = null
+      }, 160)
+    }
+
     if (scrollFrame.current !== null) return
 
     scrollFrame.current = requestAnimationFrame(() => {
@@ -97,6 +116,27 @@ export function CardFeed({ cards, label }: CardFeedProps) {
       scrollFrame.current = null
     })
   }, [updateActiveCard])
+
+  const handleScrollEnd = useCallback(() => {
+    feedRef.current?.removeAttribute('data-scrolling')
+
+    if (scrollEndTimer.current !== null) {
+      window.clearTimeout(scrollEndTimer.current)
+      scrollEndTimer.current = null
+    }
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (scrollFrame.current !== null) {
+        cancelAnimationFrame(scrollFrame.current)
+      }
+
+      if (scrollEndTimer.current !== null) {
+        window.clearTimeout(scrollEndTimer.current)
+      }
+    }
+  }, [])
 
   const scrollToCard = useCallback(
     (index: number) => {
@@ -152,6 +192,7 @@ export function CardFeed({ cards, label }: CardFeedProps) {
       tabIndex={0}
       onKeyDown={handleKeyDown}
       onScroll={handleScroll}
+      onScrollEnd={handleScrollEnd}
     >
       <div className="project-rail">
         <div
