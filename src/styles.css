@@ -98,19 +98,11 @@ a {
 }
 
 .intro-text--2 {
-  animation-delay: 100ms;
+  animation-delay: 140ms;
 }
 
 .intro-text--3 {
-  animation-delay: 160ms;
-}
-
-.intro-text--4 {
-  animation-delay: 220ms;
-}
-
-.intro-text--5 {
-  animation-delay: 280ms;
+  animation-delay: 240ms;
 }
 
 .feed-stage {

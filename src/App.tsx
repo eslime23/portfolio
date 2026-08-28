@@ -38,10 +38,10 @@ export function App() {
 
         <nav className="section-toggle" aria-label="Portfolio sections">
           <button className="is-active" type="button" aria-pressed="true">
-            <span className="intro-text intro-text--4">Design</span>
+            Design
           </button>
           <button type="button" aria-pressed="false">
-            <span className="intro-text intro-text--5">Fun</span>
+            Fun
           </button>
         </nav>
       </div>
