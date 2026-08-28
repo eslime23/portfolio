@@ -161,8 +161,8 @@ a {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .project-card:hover img,
-  .project-card:hover video {
+  .project-feed:not([data-scrolling='true']) .project-card:hover img,
+  .project-feed:not([data-scrolling='true']) .project-card:hover video {
     transform: scale(1.01);
   }
 }

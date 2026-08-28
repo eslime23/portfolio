@@ -111,11 +111,16 @@ export function CardFeed({ cards, label }: CardFeedProps) {
   const handleScroll = useCallback(() => {
     setIsScrolling(true)
 
-    if (scrollEndTimer.current !== null) {
-      window.clearTimeout(scrollEndTimer.current)
-    }
+    // Chromium fires `scrollend` after scroll snapping has actually settled.
+    // Keep a fallback only for browsers without it, so separate trackpad
+    // impulses cannot repeatedly restart the settle animation.
+    if (feedRef.current && !('onscrollend' in feedRef.current)) {
+      if (scrollEndTimer.current !== null) {
+        window.clearTimeout(scrollEndTimer.current)
+      }
 
-    scrollEndTimer.current = window.setTimeout(finishScroll, 140)
+      scrollEndTimer.current = window.setTimeout(finishScroll, 400)
+    }
 
     if (scrollFrame.current !== null) return
 
@@ -193,6 +198,7 @@ export function CardFeed({ cards, label }: CardFeedProps) {
       ref={feedRef}
       className="project-feed"
       aria-label={label}
+      data-scrolling={isScrolling ? 'true' : undefined}
       tabIndex={0}
       onKeyDown={handleKeyDown}
       onScroll={handleScroll}

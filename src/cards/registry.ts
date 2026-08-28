@@ -24,6 +24,8 @@ function getCardContentLayout(
 const phonePreviewLayout = getCardContentLayout(219, 439)
 const videoPreviewLayout = getCardContentLayout(420, (174 / 620) * 420)
 const bezelAgentsLayout = getCardContentLayout(876, 1348, 'bottom')
+const lidarLayout = getCardContentLayout(1756, 876)
+const worldsTopArtistsLayout = getCardContentLayout(876, 1756)
 
 const cards = [
   {
@@ -166,6 +168,46 @@ const cards = [
       alt: 'Active agents dashboard in an iPhone frame',
       verticalAlign: 'bottom',
       placement: bezelAgentsLayout.placement,
+      fit: 'fill',
+    },
+    source: {
+      type: 'file',
+    },
+  },
+  {
+    id: 'lidar',
+    title: 'LiDAR',
+    section: 'design',
+    status: 'published',
+    order: 90,
+    width: lidarLayout.width,
+    height: lidarLayout.height,
+    radius: 26,
+    background: '#f7f7f7',
+    asset: {
+      src: '/cards/lidar/preview.png',
+      alt: 'LiDAR street scan dashboard in a landscape iPhone frame',
+      placement: lidarLayout.placement,
+      fit: 'fill',
+    },
+    source: {
+      type: 'file',
+    },
+  },
+  {
+    id: 'worlds-top-artists',
+    title: "World's Top Artists",
+    section: 'design',
+    status: 'published',
+    order: 100,
+    width: worldsTopArtistsLayout.width,
+    height: worldsTopArtistsLayout.height,
+    radius: 26,
+    background: '#f7f7f7',
+    asset: {
+      src: '/cards/worlds-top-artists/preview.png',
+      alt: "World's Top Artists ranking in an iPhone frame",
+      placement: worldsTopArtistsLayout.placement,
       fit: 'fill',
     },
     source: {
