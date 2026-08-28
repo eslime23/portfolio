@@ -1,13 +1,12 @@
 import {
   useCallback,
+  useEffect,
   useRef,
   useState,
   type CSSProperties,
   type KeyboardEvent,
 } from 'react'
-import { motion, useReducedMotion } from 'motion/react'
 import { constrainPlacementToCardWidth } from './layout'
-import { cardSnapMotion } from './motion'
 import type { PortfolioCard } from './types'
 
 interface CardFeedProps {
@@ -60,14 +59,10 @@ function getAssetStyle(card: PortfolioCard): CSSProperties {
 }
 
 export function CardFeed({ cards, label }: CardFeedProps) {
-  const reduceMotion = useReducedMotion()
   const feedRef = useRef<HTMLElement>(null)
   const cardRefs = useRef(new Map<string, HTMLElement>())
-  const scrollFrame = useRef<number | null>(null)
+  const scrollEndTimer = useRef<number | null>(null)
   const [activeCardId, setActiveCardId] = useState(cards[0]?.id)
-  const [interactionMode, setInteractionMode] = useState<'gesture' | 'keyboard'>(
-    'gesture',
-  )
 
   const updateActiveCard = useCallback(() => {
     const feed = feedRef.current
@@ -96,13 +91,51 @@ export function CardFeed({ cards, label }: CardFeedProps) {
   }, [cards])
 
   const handleScroll = useCallback(() => {
-    if (scrollFrame.current !== null) return
+    const feed = feedRef.current
 
-    scrollFrame.current = requestAnimationFrame(() => {
+    if (!feed) return
+
+    // The wheel/touch gesture remains entirely native. This flag only gates
+    // the card hover transition while content passes under a fixed pointer.
+    if (!feed.hasAttribute('data-scrolling')) {
+      feed.setAttribute('data-scrolling', 'true')
+    }
+
+    // Chromium and current Safari fire `scrollend`. This keeps old browsers
+    // functional without scheduling visual work for every scroll frame.
+    const supportsScrollEnd = 'onscrollend' in (feed as object)
+
+    if (supportsScrollEnd) return
+
+    if (scrollEndTimer.current !== null) {
+      window.clearTimeout(scrollEndTimer.current)
+    }
+
+    scrollEndTimer.current = window.setTimeout(() => {
+      feed.removeAttribute('data-scrolling')
       updateActiveCard()
-      scrollFrame.current = null
-    })
+      scrollEndTimer.current = null
+    }, 160)
   }, [updateActiveCard])
+
+  const handleScrollEnd = useCallback(() => {
+    feedRef.current?.removeAttribute('data-scrolling')
+
+    if (scrollEndTimer.current !== null) {
+      window.clearTimeout(scrollEndTimer.current)
+      scrollEndTimer.current = null
+    }
+
+    updateActiveCard()
+  }, [updateActiveCard])
+
+  useEffect(() => {
+    return () => {
+      if (scrollEndTimer.current !== null) {
+        window.clearTimeout(scrollEndTimer.current)
+      }
+    }
+  }, [])
 
   const scrollToCard = useCallback(
     (index: number, behavior: ScrollBehavior = 'smooth') => {
@@ -110,6 +143,7 @@ export function CardFeed({ cards, label }: CardFeedProps) {
 
       if (!card) return
 
+      setActiveCardId(card.id)
       cardRefs.current.get(card.id)?.scrollIntoView({
         behavior,
         block: 'center',
@@ -127,25 +161,21 @@ export function CardFeed({ cards, label }: CardFeedProps) {
 
     if (event.key === 'ArrowDown' || event.key === 'PageDown') {
       event.preventDefault()
-      setInteractionMode('keyboard')
       scrollToCard(currentIndex + 1, instant)
     }
 
     if (event.key === 'ArrowUp' || event.key === 'PageUp') {
       event.preventDefault()
-      setInteractionMode('keyboard')
       scrollToCard(currentIndex - 1, instant)
     }
 
     if (event.key === 'Home') {
       event.preventDefault()
-      setInteractionMode('keyboard')
       scrollToCard(0, instant)
     }
 
     if (event.key === 'End') {
       event.preventDefault()
-      setInteractionMode('keyboard')
       scrollToCard(cards.length - 1, instant)
     }
   }
@@ -163,8 +193,7 @@ export function CardFeed({ cards, label }: CardFeedProps) {
       tabIndex={0}
       onKeyDown={handleKeyDown}
       onScroll={handleScroll}
-      onTouchStart={() => setInteractionMode('gesture')}
-      onWheel={() => setInteractionMode('gesture')}
+      onScrollEnd={handleScrollEnd}
     >
       <div className="project-rail">
         <div
@@ -176,7 +205,6 @@ export function CardFeed({ cards, label }: CardFeedProps) {
         />
 
         {cards.map((card, index) => {
-          const springEnabled = !reduceMotion && interactionMode === 'gesture'
           const isActive = activeCardId === card.id
 
           return (
@@ -193,20 +221,8 @@ export function CardFeed({ cards, label }: CardFeedProps) {
               key={card.id}
               data-card-id={card.id}
             >
-              <motion.article
+              <article
                 className="project-card"
-                initial={false}
-                animate={{
-                  transform:
-                    springEnabled && !isActive
-                      ? cardSnapMotion.inactiveTransform
-                      : cardSnapMotion.activeTransform,
-                }}
-                transition={
-                  springEnabled
-                    ? cardSnapMotion.spring
-                    : cardSnapMotion.instant
-                }
                 aria-current={isActive ? 'true' : undefined}
                 aria-label={`${index + 1} of ${cards.length}: ${card.title}`}
               >
@@ -230,7 +246,7 @@ export function CardFeed({ cards, label }: CardFeedProps) {
                     loading={index < 2 ? 'eager' : 'lazy'}
                   />
                 ) : null}
-              </motion.article>
+              </article>
             </div>
           )
         })}
