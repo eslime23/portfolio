@@ -146,7 +146,7 @@ a {
   will-change: transform;
 }
 
-.project-feed[data-scrolling='true'] .project-card {
+.project-feed[data-scrolling='true'] .project-card[aria-current='true'] {
   transform: scale(0.99);
 }
 
@@ -237,7 +237,7 @@ a {
   .project-card video,
   .project-card:hover img,
   .project-card:hover video,
-  .project-feed[data-scrolling='true'] .project-card {
+  .project-feed[data-scrolling='true'] .project-card[aria-current='true'] {
     transform: scale(1);
     transition: none;
   }
