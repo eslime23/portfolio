@@ -1,62 +1,50 @@
-const projects = [
-  {
-    id: 'project-mark',
-    className: 'project-card--mark',
-    image: '/assets/figma/project-01.png',
-    alt: '',
-  },
-  {
-    id: 'grok-bot',
-    className: 'project-card--grok',
-    image: '/assets/figma/project-02.png',
-    alt: 'Blue bot character',
-  },
-  {
-    id: 'notifications',
-    className: 'project-card--notifications',
-    image: '/assets/figma/project-03.png',
-    alt: 'Mobile notifications project',
-  },
-  {
-    id: 'bezel',
-    className: 'project-card--bezel',
-    image: '/assets/figma/project-04.png',
-    alt: '',
-  },
-]
+import { CardFeed } from './cards/CardFeed'
+import { getPublishedCards } from './cards/registry'
+import { GradualBlur } from './components/GradualBlur'
+
+const designCards = getPublishedCards('design')
+const feedBlurProps = {
+  target: 'parent' as const,
+  height: '6rem',
+  strength: 2,
+  divCount: 5,
+  curve: 'bezier' as const,
+  exponential: true,
+  opacity: 1,
+  zIndex: 2,
+}
 
 export function App() {
   return (
     <main className="portfolio-shell">
-      <header className="portfolio-header">
-        <div className="identity">
-          <p>Nikitin Anton</p>
-          <p>Design engineer at&nbsp;GigaChat</p>
-        </div>
+      <div className="feed-stage">
+        <CardFeed cards={designCards} label="Design projects" />
 
-        <p className="telegram-label">Telegram</p>
-      </header>
+        <GradualBlur {...feedBlurProps} position="top" />
+        <GradualBlur {...feedBlurProps} position="bottom" />
+      </div>
 
-      <section className="project-rail" aria-label="Design projects">
-        {projects.map((project) => (
-          <article className={`project-card ${project.className}`} key={project.id}>
-            <img src={project.image} alt={project.alt} />
-          </article>
-        ))}
-      </section>
+      <div className="portfolio-ui">
+        <header className="portfolio-header">
+          <div className="identity">
+            <p className="intro-text intro-text--1">Nikitin Anton</p>
+            <p className="intro-text intro-text--2">
+              Design engineer at&nbsp;GigaChat
+            </p>
+          </div>
 
-      <nav className="section-toggle" aria-label="Portfolio sections">
-        <button
-          className="is-active"
-          type="button"
-          aria-pressed="true"
-        >
-          Design
-        </button>
-        <button type="button" aria-pressed="false">
-          Fun
-        </button>
-      </nav>
+          <p className="telegram-label intro-text intro-text--3">Telegram</p>
+        </header>
+
+        <nav className="section-toggle" aria-label="Portfolio sections">
+          <button className="is-active" type="button" aria-pressed="true">
+            Design
+          </button>
+          <button type="button" aria-pressed="false">
+            Fun
+          </button>
+        </nav>
+      </div>
     </main>
   )
 }

@@ -1,4 +1,6 @@
 :root {
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+
   font-family: Inter, "Helvetica Neue", Arial, sans-serif;
   color: #000;
   background: #fff;
@@ -40,11 +42,12 @@ a {
 
 .portfolio-header {
   position: absolute;
-  z-index: 2;
+  z-index: 1;
   inset: 20px 20px auto;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  pointer-events: none;
 }
 
 .identity {
@@ -71,68 +74,139 @@ a {
   letter-spacing: -0.04em;
 }
 
-.project-rail {
+@keyframes intro-text-reveal {
+  from {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+.intro-text {
+  display: inline-block;
+  animation: intro-text-reveal 300ms var(--ease-out) both;
+}
+
+.intro-text--1 {
+  animation-delay: 40ms;
+}
+
+.intro-text--2 {
+  animation-delay: 140ms;
+}
+
+.intro-text--3 {
+  animation-delay: 240ms;
+}
+
+.feed-stage {
   position: absolute;
-  top: calc(50% - 0.5px);
-  left: 50%;
+  z-index: 1;
+  inset: 0;
+  contain: paint;
+  isolation: isolate;
+}
+
+.portfolio-ui {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  contain: paint;
+  isolation: isolate;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  pointer-events: none;
+}
+
+.project-feed {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.project-feed::-webkit-scrollbar {
+  display: none;
+}
+
+.project-feed:focus {
+  outline: none;
+}
+
+.project-rail {
   display: flex;
-  width: 420px;
-  height: 1961px;
+  min-height: 100%;
   flex-direction: column;
-  gap: 16px;
-  transform: translate(-50%, -50%);
+  align-items: center;
+}
+
+.project-feed__spacer {
+  width: 1px;
+  flex: 0 0 auto;
+}
+
+.project-card-snap {
+  width: var(--card-width);
+  height: var(--card-height);
+  flex: 0 0 auto;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
 }
 
 .project-card {
   position: relative;
-  flex: 0 0 auto;
-  width: 420px;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
-  border-radius: 26px;
-  background: #f7f7f7;
+  border-radius: var(--card-radius);
+  background: var(--card-background);
+  transform-origin: center;
+  transition: transform 160ms var(--ease-out);
+  will-change: transform;
 }
 
-.project-card img {
+.project-feed[data-scrolling='true'] .project-card[aria-current='true'] {
+  transform: scale(0.99);
+}
+
+.project-card img,
+.project-card video {
   position: absolute;
   display: block;
   max-width: none;
+  transform: scale(1);
+  transform-origin: center;
+  transition: transform 400ms var(--ease-out);
+  user-select: none;
+  will-change: transform;
 }
 
-.project-card--mark,
-.project-card--grok {
-  height: 420px;
+.project-card video {
+  pointer-events: none;
 }
 
-.project-card--notifications {
-  height: 610px;
-}
-
-.project-card--bezel {
-  height: 463px;
-}
-
-.project-card--mark img,
-.project-card--bezel img {
-  display: none;
-}
-
-.project-card--grok img {
-  top: 145px;
-  left: 0;
-  width: 420px;
-  height: 275px;
-}
-
-.project-card--notifications img {
-  top: 0;
-  left: 0;
-  width: 420px;
-  height: 509px;
+@media (hover: hover) and (pointer: fine) {
+  .project-feed:not([data-scrolling='true']) .project-card:hover img,
+  .project-feed:not([data-scrolling='true']) .project-card:hover video {
+    transform: scale(1.01);
+  }
 }
 
 .section-toggle {
   position: absolute;
-  z-index: 3;
+  z-index: 2;
   bottom: 14px;
   left: 50%;
   display: flex;
@@ -146,6 +220,7 @@ a {
   background: #fff;
   box-shadow: 6px 7px 15px rgb(0 0 0 / 4%);
   transform: translateX(-50%);
+  pointer-events: auto;
 }
 
 .section-toggle button {
@@ -175,11 +250,30 @@ a {
 }
 
 @media (max-width: 479px) {
-  .project-rail {
-    transform: translate(-50%, -50%) scale(0.86);
+  .project-card-snap {
+    transform: scale(0.86);
   }
 
   .portfolio-header {
     inset-inline: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro-text {
+    animation: none;
+  }
+
+  .project-feed {
+    scroll-behavior: auto;
+  }
+
+  .project-card img,
+  .project-card video,
+  .project-card:hover img,
+  .project-card:hover video,
+  .project-feed[data-scrolling='true'] .project-card[aria-current='true'] {
+    transform: scale(1);
+    transition: none;
   }
 }
