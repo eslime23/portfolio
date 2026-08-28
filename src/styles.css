@@ -101,8 +101,8 @@ a {
   overflow-y: auto;
   overscroll-behavior-y: contain;
   scrollbar-width: none;
+  scroll-behavior: smooth;
   scroll-snap-type: y mandatory;
-  touch-action: pan-y;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -131,6 +131,7 @@ a {
   height: var(--card-height);
   flex: 0 0 auto;
   scroll-snap-align: center;
+  scroll-snap-stop: always;
 }
 
 .project-card {

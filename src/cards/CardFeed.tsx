@@ -1,6 +1,5 @@
 import {
   useCallback,
-  useEffect,
   useRef,
   useState,
   type CSSProperties,
@@ -61,7 +60,7 @@ function getAssetStyle(card: PortfolioCard): CSSProperties {
 export function CardFeed({ cards, label }: CardFeedProps) {
   const feedRef = useRef<HTMLElement>(null)
   const cardRefs = useRef(new Map<string, HTMLElement>())
-  const scrollEndTimer = useRef<number | null>(null)
+  const scrollFrame = useRef<number | null>(null)
   const [activeCardId, setActiveCardId] = useState(cards[0]?.id)
 
   const updateActiveCard = useCallback(() => {
@@ -91,61 +90,22 @@ export function CardFeed({ cards, label }: CardFeedProps) {
   }, [cards])
 
   const handleScroll = useCallback(() => {
-    const feed = feedRef.current
+    if (scrollFrame.current !== null) return
 
-    if (!feed) return
-
-    // The wheel/touch gesture remains entirely native. This flag only gates
-    // the card hover transition while content passes under a fixed pointer.
-    if (!feed.hasAttribute('data-scrolling')) {
-      feed.setAttribute('data-scrolling', 'true')
-    }
-
-    // Chromium and current Safari fire `scrollend`. This keeps old browsers
-    // functional without scheduling visual work for every scroll frame.
-    const supportsScrollEnd = 'onscrollend' in (feed as object)
-
-    if (supportsScrollEnd) return
-
-    if (scrollEndTimer.current !== null) {
-      window.clearTimeout(scrollEndTimer.current)
-    }
-
-    scrollEndTimer.current = window.setTimeout(() => {
-      feed.removeAttribute('data-scrolling')
+    scrollFrame.current = requestAnimationFrame(() => {
       updateActiveCard()
-      scrollEndTimer.current = null
-    }, 160)
+      scrollFrame.current = null
+    })
   }, [updateActiveCard])
-
-  const handleScrollEnd = useCallback(() => {
-    feedRef.current?.removeAttribute('data-scrolling')
-
-    if (scrollEndTimer.current !== null) {
-      window.clearTimeout(scrollEndTimer.current)
-      scrollEndTimer.current = null
-    }
-
-    updateActiveCard()
-  }, [updateActiveCard])
-
-  useEffect(() => {
-    return () => {
-      if (scrollEndTimer.current !== null) {
-        window.clearTimeout(scrollEndTimer.current)
-      }
-    }
-  }, [])
 
   const scrollToCard = useCallback(
-    (index: number, behavior: ScrollBehavior = 'smooth') => {
+    (index: number) => {
       const card = cards[Math.max(0, Math.min(index, cards.length - 1))]
 
       if (!card) return
 
-      setActiveCardId(card.id)
       cardRefs.current.get(card.id)?.scrollIntoView({
-        behavior,
+        behavior: 'smooth',
         block: 'center',
       })
     },
@@ -153,7 +113,6 @@ export function CardFeed({ cards, label }: CardFeedProps) {
   )
 
   const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
-    const instant = 'instant' as ScrollBehavior
     const currentIndex = Math.max(
       0,
       cards.findIndex((card) => card.id === activeCardId),
@@ -161,22 +120,22 @@ export function CardFeed({ cards, label }: CardFeedProps) {
 
     if (event.key === 'ArrowDown' || event.key === 'PageDown') {
       event.preventDefault()
-      scrollToCard(currentIndex + 1, instant)
+      scrollToCard(currentIndex + 1)
     }
 
     if (event.key === 'ArrowUp' || event.key === 'PageUp') {
       event.preventDefault()
-      scrollToCard(currentIndex - 1, instant)
+      scrollToCard(currentIndex - 1)
     }
 
     if (event.key === 'Home') {
       event.preventDefault()
-      scrollToCard(0, instant)
+      scrollToCard(0)
     }
 
     if (event.key === 'End') {
       event.preventDefault()
-      scrollToCard(cards.length - 1, instant)
+      scrollToCard(cards.length - 1)
     }
   }
 
@@ -193,7 +152,6 @@ export function CardFeed({ cards, label }: CardFeedProps) {
       tabIndex={0}
       onKeyDown={handleKeyDown}
       onScroll={handleScroll}
-      onScrollEnd={handleScrollEnd}
     >
       <div className="project-rail">
         <div
