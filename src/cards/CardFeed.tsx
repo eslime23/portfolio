@@ -60,6 +60,8 @@ function getAssetStyle(card: PortfolioCard): CSSProperties {
 
 export function CardFeed({ cards, label }: CardFeedProps) {
   const feedRef = useRef<HTMLElement>(null)
+  const topLensRef = useRef<HTMLElement>(null)
+  const bottomLensRef = useRef<HTMLElement>(null)
   const cardRefs = useRef(new Map<string, HTMLElement>())
   const scrollFrame = useRef<number | null>(null)
   const scrollEndTimer = useRef<number | null>(null)
@@ -112,6 +114,11 @@ export function CardFeed({ cards, label }: CardFeedProps) {
     if (scrollFrame.current !== null) return
 
     scrollFrame.current = requestAnimationFrame(() => {
+      const scrollTop = feedRef.current?.scrollTop ?? 0
+
+      if (topLensRef.current) topLensRef.current.scrollTop = scrollTop
+      if (bottomLensRef.current) bottomLensRef.current.scrollTop = scrollTop
+
       updateActiveCard()
       scrollFrame.current = null
     })
@@ -184,80 +191,110 @@ export function CardFeed({ cards, label }: CardFeedProps) {
   const firstCard = cards[0]
   const lastCard = cards[cards.length - 1]
 
-  return (
-    <section
-      ref={feedRef}
-      className="project-feed"
-      aria-label={label}
-      tabIndex={0}
-      onKeyDown={handleKeyDown}
-      onScroll={handleScroll}
-      onScrollEnd={handleScrollEnd}
-    >
-      <div className="project-rail">
-        <div
-          className="project-feed__spacer"
-          style={{
-            height: `max(0px, calc((100dvh - ${firstCard.height}px) / 2))`,
-          }}
-          aria-hidden="true"
-        />
+  const renderRail = (isLens = false) => (
+    <div className="project-rail">
+      <div
+        className="project-feed__spacer"
+        style={{
+          height: `max(0px, calc((100dvh - ${firstCard.height}px) / 2))`,
+        }}
+        aria-hidden="true"
+      />
 
-        {cards.map((card, index) => {
-          const isActive = activeCardId === card.id
+      {cards.map((card, index) => {
+        const isActive = activeCardId === card.id
 
-          return (
-            <div
-              ref={(element) => {
-                if (element) cardRefs.current.set(card.id, element)
-                else cardRefs.current.delete(card.id)
-              }}
-              className="project-card-snap"
-              style={{
-                ...getCardStyle(card),
-                marginBottom: index === cards.length - 1 ? 0 : 16,
-              }}
-              key={card.id}
-              data-card-id={card.id}
+        return (
+          <div
+            ref={
+              isLens
+                ? undefined
+                : (element) => {
+                    if (element) cardRefs.current.set(card.id, element)
+                    else cardRefs.current.delete(card.id)
+                  }
+            }
+            className="project-card-snap"
+            style={{
+              ...getCardStyle(card),
+              marginBottom: index === cards.length - 1 ? 0 : 16,
+            }}
+            key={`${card.id}-${isLens ? 'lens' : 'main'}`}
+            data-card-id={isLens ? undefined : card.id}
+          >
+            <article
+              className="project-card"
+              aria-current={!isLens && isActive ? 'true' : undefined}
+              aria-label={
+                isLens
+                  ? undefined
+                  : `${index + 1} of ${cards.length}: ${card.title}`
+              }
             >
-              <article
-                className="project-card"
-                aria-current={isActive ? 'true' : undefined}
-                aria-label={`${index + 1} of ${cards.length}: ${card.title}`}
-              >
-                {card.asset?.kind === 'video' ? (
-                  <video
-                    src={card.asset.src}
-                    aria-label={card.asset.alt}
-                    style={getAssetStyle(card)}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    preload={index < 2 ? 'auto' : 'metadata'}
-                  />
-                ) : card.asset ? (
-                  <img
-                    src={card.asset.src}
-                    alt={card.asset.alt}
-                    style={getAssetStyle(card)}
-                    draggable="false"
-                    loading={index < 2 ? 'eager' : 'lazy'}
-                  />
-                ) : null}
-              </article>
-            </div>
-          )
-        })}
+              {card.asset?.kind === 'video' ? (
+                <video
+                  src={card.asset.src}
+                  aria-label={isLens ? undefined : card.asset.alt}
+                  style={getAssetStyle(card)}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload={index < 2 ? 'auto' : 'metadata'}
+                />
+              ) : card.asset ? (
+                <img
+                  src={card.asset.src}
+                  alt={isLens ? '' : card.asset.alt}
+                  style={getAssetStyle(card)}
+                  draggable="false"
+                  loading={index < 2 ? 'eager' : 'lazy'}
+                />
+              ) : null}
+            </article>
+          </div>
+        )
+      })}
 
-        <div
-          className="project-feed__spacer"
-          style={{
-            height: `max(0px, calc((100dvh - ${lastCard.height}px) / 2))`,
-          }}
-          aria-hidden="true"
-        />
-      </div>
-    </section>
+      <div
+        className="project-feed__spacer"
+        style={{
+          height: `max(0px, calc((100dvh - ${lastCard.height}px) / 2))`,
+        }}
+        aria-hidden="true"
+      />
+    </div>
+  )
+
+  return (
+    <>
+      <section
+        ref={feedRef}
+        className="project-feed"
+        aria-label={label}
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
+        onScroll={handleScroll}
+        onScrollEnd={handleScrollEnd}
+      >
+        {renderRail()}
+      </section>
+
+      <section
+        ref={topLensRef}
+        className="project-feed project-feed--lens project-feed--lens-top"
+        aria-hidden="true"
+      >
+        {renderRail(true)}
+      </section>
+
+      <section
+        ref={bottomLensRef}
+        className="project-feed project-feed--lens project-feed--lens-bottom"
+        aria-hidden="true"
+      >
+        {renderRail(true)}
+      </section>
+    </>
   )
 }
