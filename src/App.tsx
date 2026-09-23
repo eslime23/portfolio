@@ -43,6 +43,9 @@ export function App() {
           <button type="button" aria-pressed="false">
             Fun
           </button>
+          <button type="button" aria-pressed="false">
+            Photos
+          </button>
         </nav>
       </div>
     </main>
