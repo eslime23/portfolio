@@ -109,6 +109,8 @@ a {
   position: absolute;
   z-index: 1;
   inset: 0;
+  contain: paint;
+  isolation: isolate;
 }
 
 .portfolio-ui {
@@ -143,42 +145,77 @@ a {
   outline: none;
 }
 
-.project-feed--lens {
-  z-index: 2;
-  overflow-y: hidden;
-  filter: blur(4px) saturate(1.06) contrast(1.02);
+.lens-refraction {
+  position: absolute;
+  right: 0;
+  left: 0;
+  overflow: hidden;
+  isolation: isolate;
   pointer-events: none;
-  scroll-behavior: auto;
+}
+
+.lens-refraction__layer {
+  position: absolute;
+  top: var(--lens-layer-start);
+  right: -5%;
+  left: -5%;
+  height: var(--lens-layer-size);
+  opacity: var(--lens-opacity);
+  background: rgb(255 255 255 / 3%);
+  backdrop-filter: blur(var(--lens-blur)) saturate(1.08) contrast(1.025);
+  -webkit-backdrop-filter: blur(var(--lens-blur)) saturate(1.08)
+    contrast(1.025);
+  transform: translate3d(0, var(--lens-shift), 0) scaleX(var(--lens-scale));
   will-change: transform;
 }
 
-.project-feed--lens-top {
-  mask-image: linear-gradient(
-    to bottom,
-    #000 0%,
-    #000 9%,
-    transparent 22%
-  );
+.lens-refraction--top {
+  mask-image: linear-gradient(to bottom, #000 0%, #000 65%, transparent 100%);
   -webkit-mask-image: linear-gradient(
     to bottom,
     #000 0%,
-    #000 9%,
-    transparent 22%
+    #000 65%,
+    transparent 100%
   );
-  transform: translate3d(0, -5px, 0) scaleX(1.035);
-  transform-origin: center top;
 }
 
-.project-feed--lens-bottom {
-  mask-image: linear-gradient(to top, #000 0%, #000 9%, transparent 22%);
+.lens-refraction--top::after,
+.lens-refraction--bottom::after {
+  position: absolute;
+  right: 0;
+  left: 0;
+  height: 40%;
+  content: '';
+  opacity: 0.32;
+  pointer-events: none;
+}
+
+.lens-refraction--top::after {
+  bottom: 0;
+  background: radial-gradient(
+    120% 100% at 50% 100%,
+    rgb(255 255 255 / 26%),
+    transparent 68%
+  );
+}
+
+.lens-refraction--bottom {
+  mask-image: linear-gradient(to top, #000 0%, #000 65%, transparent 100%);
   -webkit-mask-image: linear-gradient(
     to top,
     #000 0%,
-    #000 9%,
-    transparent 22%
+    #000 65%,
+    transparent 100%
   );
-  transform: translate3d(0, 5px, 0) scaleX(1.035);
-  transform-origin: center bottom;
+}
+
+.lens-refraction--bottom::after {
+  top: 0;
+  background: radial-gradient(
+    120% 100% at 50% 0%,
+    rgb(255 255 255 / 26%),
+    transparent 68%
+  );
 }
 
 .project-rail {

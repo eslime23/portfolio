@@ -1,13 +1,22 @@
 import { CardFeed } from './cards/CardFeed'
 import { getPublishedCards } from './cards/registry'
+import { LensRefraction } from './components/LensRefraction'
 
 const designCards = getPublishedCards('design')
+const feedLensProps = {
+  height: '10rem',
+  strength: 1.5,
+  zIndex: 2,
+}
 
 export function App() {
   return (
     <main className="portfolio-shell">
       <div className="feed-stage">
         <CardFeed cards={designCards} label="Design projects" />
+
+        <LensRefraction {...feedLensProps} position="top" />
+        <LensRefraction {...feedLensProps} position="bottom" />
       </div>
 
       <div className="portfolio-ui">
