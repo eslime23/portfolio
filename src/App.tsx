@@ -1,11 +1,16 @@
 import { CardFeed } from './cards/CardFeed'
 import { getPublishedCards } from './cards/registry'
-import { LensRefraction } from './components/LensRefraction'
+import { GradualBlur } from './components/GradualBlur'
 
 const designCards = getPublishedCards('design')
-const feedLensProps = {
-  height: '10rem',
-  strength: 1.5,
+const feedBlurProps = {
+  target: 'parent' as const,
+  height: '6rem',
+  strength: 2,
+  divCount: 5,
+  curve: 'bezier' as const,
+  exponential: true,
+  opacity: 1,
   zIndex: 2,
 }
 
@@ -15,8 +20,8 @@ export function App() {
       <div className="feed-stage">
         <CardFeed cards={designCards} label="Design projects" />
 
-        <LensRefraction {...feedLensProps} position="top" />
-        <LensRefraction {...feedLensProps} position="bottom" />
+        <GradualBlur {...feedBlurProps} position="top" />
+        <GradualBlur {...feedBlurProps} position="bottom" />
       </div>
 
       <div className="portfolio-ui">
