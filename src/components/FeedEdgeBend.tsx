@@ -4,7 +4,6 @@ import {
   useEffect,
   useImperativeHandle,
   useRef,
-  useState,
   type RefObject,
 } from 'react'
 
@@ -19,7 +18,7 @@ interface FeedEdgeBendProps {
 
 type Edge = 'top' | 'bottom'
 
-const edgeDepth = 88
+const edgeDepth = 96
 const stripHeight = 2
 
 function isRenderableMedia(element: HTMLImageElement | HTMLVideoElement) {
@@ -43,12 +42,12 @@ function drawCardStrip(
     edge === 'top'
       ? Math.min(1, Math.max(0, (y - edgeStart) / edgeDepth))
       : Math.min(1, Math.max(0, (edgeStart + edgeDepth - y) / edgeDepth))
-  const strength = Math.pow(1 - progress, 3)
+  const strength = Math.pow(1 - progress, 1.6)
 
   if (strength <= 0) return
 
-  const scaleX = 1 + strength * 0.045
-  const offsetY = (edge === 'top' ? -1 : 1) * strength * 2.5
+  const scaleX = 1 + strength * 0.12
+  const offsetY = (edge === 'top' ? -1 : 1) * strength * 4
   const centerX = viewportWidth / 2
   const cardX = centerX + (cardBounds.left - centerX) * scaleX
   const cardY = cardBounds.top + offsetY
@@ -65,7 +64,7 @@ function drawCardStrip(
   context.beginPath()
   context.roundRect(cardX, cardY, cardWidth, cardBounds.height, radius * scaleX)
   context.clip()
-  context.globalAlpha = strength
+  context.globalAlpha = Math.min(1, strength * 1.65)
 
   // The canvas is transparent outside the transformed card fragment. The DOM
   // below remains visible, so the refraction never acts as a clipping mask.
@@ -95,8 +94,6 @@ export const FeedEdgeBend = forwardRef<FeedEdgeBendHandle, FeedEdgeBendProps>(
   function FeedEdgeBend({ feedRef, cardRefs }, ref) {
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const frameRef = useRef<number | null>(null)
-    const [enabled, setEnabled] = useState(false)
-
     const redraw = useCallback(() => {
       if (frameRef.current !== null) return
 
@@ -145,27 +142,6 @@ export const FeedEdgeBend = forwardRef<FeedEdgeBendHandle, FeedEdgeBendProps>(
     useImperativeHandle(ref, () => ({ redraw }), [redraw])
 
     useEffect(() => {
-      const finePointer = window.matchMedia('(pointer: fine)')
-      const reducedMotion = window.matchMedia(
-        '(prefers-reduced-motion: reduce)',
-      )
-      const updateEnabled = () => {
-        setEnabled(finePointer.matches && !reducedMotion.matches)
-      }
-
-      updateEnabled()
-      finePointer.addEventListener('change', updateEnabled)
-      reducedMotion.addEventListener('change', updateEnabled)
-
-      return () => {
-        finePointer.removeEventListener('change', updateEnabled)
-        reducedMotion.removeEventListener('change', updateEnabled)
-      }
-    }, [])
-
-    useEffect(() => {
-      if (!enabled) return
-
       const feed = feedRef.current
       const observer = new ResizeObserver(redraw)
       const media = Array.from(
@@ -186,15 +162,13 @@ export const FeedEdgeBend = forwardRef<FeedEdgeBendHandle, FeedEdgeBendProps>(
           element.removeEventListener('loadeddata', redraw)
         })
       }
-    }, [enabled, feedRef, redraw])
+    }, [feedRef, redraw])
 
     useEffect(() => {
       return () => {
         if (frameRef.current !== null) cancelAnimationFrame(frameRef.current)
       }
     }, [])
-
-    if (!enabled) return null
 
     return <canvas ref={canvasRef} className="feed-edge-bend" aria-hidden="true" />
   },
