@@ -145,14 +145,6 @@ a {
   outline: none;
 }
 
-.feed-edge-bend {
-  position: absolute;
-  z-index: 2;
-  inset: 0;
-  display: block;
-  pointer-events: none;
-}
-
 .project-rail {
   display: flex;
   min-height: 100%;
