@@ -6,6 +6,7 @@ import {
   type CSSProperties,
   type KeyboardEvent,
 } from 'react'
+import { FeedEdgeBend, type FeedEdgeBendHandle } from '../components/FeedEdgeBend'
 import { constrainPlacementToCardWidth } from './layout'
 import type { PortfolioCard } from './types'
 
@@ -60,6 +61,7 @@ function getAssetStyle(card: PortfolioCard): CSSProperties {
 
 export function CardFeed({ cards, label }: CardFeedProps) {
   const feedRef = useRef<HTMLElement>(null)
+  const edgeBendRef = useRef<FeedEdgeBendHandle>(null)
   const cardRefs = useRef(new Map<string, HTMLElement>())
   const scrollFrame = useRef<number | null>(null)
   const scrollEndTimer = useRef<number | null>(null)
@@ -113,6 +115,7 @@ export function CardFeed({ cards, label }: CardFeedProps) {
 
     scrollFrame.current = requestAnimationFrame(() => {
       updateActiveCard()
+      edgeBendRef.current?.redraw()
       scrollFrame.current = null
     })
   }, [updateActiveCard])
@@ -185,16 +188,17 @@ export function CardFeed({ cards, label }: CardFeedProps) {
   const lastCard = cards[cards.length - 1]
 
   return (
-    <section
-      ref={feedRef}
-      className="project-feed"
-      aria-label={label}
-      tabIndex={0}
-      onKeyDown={handleKeyDown}
-      onScroll={handleScroll}
-      onScrollEnd={handleScrollEnd}
-    >
-      <div className="project-rail">
+    <>
+      <section
+        ref={feedRef}
+        className="project-feed"
+        aria-label={label}
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
+        onScroll={handleScroll}
+        onScrollEnd={handleScrollEnd}
+      >
+        <div className="project-rail">
         <div
           className="project-feed__spacer"
           style={{
@@ -257,7 +261,14 @@ export function CardFeed({ cards, label }: CardFeedProps) {
           }}
           aria-hidden="true"
         />
-      </div>
-    </section>
+        </div>
+      </section>
+
+      <FeedEdgeBend
+        ref={edgeBendRef}
+        feedRef={feedRef}
+        cardRefs={cardRefs}
+      />
+    </>
   )
 }
