@@ -3,8 +3,8 @@ import {
   useCallback,
   useEffect,
   useImperativeHandle,
-  useLayoutEffect,
   useRef,
+  useState,
   type RefObject,
 } from 'react'
 
@@ -19,15 +19,7 @@ interface FeedEdgeBendProps {
 
 type Edge = 'top' | 'bottom'
 
-interface CardSnapshot {
-  bounds: DOMRect
-  background: string
-  radius: number
-  media?: HTMLImageElement | HTMLVideoElement
-  mediaBounds?: DOMRect
-}
-
-const edgeDepth = 260
+const edgeDepth = 88
 const stripHeight = 2
 
 function isRenderableMedia(element: HTMLImageElement | HTMLVideoElement) {
@@ -36,162 +28,142 @@ function isRenderableMedia(element: HTMLImageElement | HTMLVideoElement) {
     : element.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA
 }
 
-function getCardSnapshot(card: HTMLElement): CardSnapshot {
-  const media = card.querySelector('img, video')
-  const renderableMedia =
-    media instanceof HTMLImageElement || media instanceof HTMLVideoElement
-      ? media
-      : undefined
-  const cardStyle = getComputedStyle(card)
-
-  return {
-    bounds: card.getBoundingClientRect(),
-    background: cardStyle.backgroundColor,
-    radius: Number.parseFloat(cardStyle.borderTopLeftRadius) || 0,
-    media: renderableMedia,
-    mediaBounds: renderableMedia?.getBoundingClientRect(),
-  }
-}
-
 function drawCardStrip(
   context: CanvasRenderingContext2D,
-  card: CardSnapshot,
+  card: HTMLElement,
   edge: Edge,
   y: number,
   height: number,
   viewportWidth: number,
   viewportHeight: number,
 ) {
+  const cardBounds = card.getBoundingClientRect()
   const edgeStart = edge === 'top' ? 0 : viewportHeight - edgeDepth
   const progress =
     edge === 'top'
       ? Math.min(1, Math.max(0, (y - edgeStart) / edgeDepth))
       : Math.min(1, Math.max(0, (edgeStart + edgeDepth - y) / edgeDepth))
-  const strength = Math.pow(1 - progress, 1.6)
-
-  if (strength <= 0) return
-
-  const scaleX = 1 + strength * 0.16
-  const offsetY = (edge === 'top' ? -1 : 1) * strength * 4
+  const strength = Math.pow(1 - progress, 3)
+  const scaleX = 1 + strength * 0.045
+  const offsetY = (edge === 'top' ? -1 : 1) * strength * 2.5
   const centerX = viewportWidth / 2
-  const cardX = centerX + (card.bounds.left - centerX) * scaleX
-  const cardY = card.bounds.top + offsetY
-  const cardWidth = card.bounds.width * scaleX
+  const cardX = centerX + (cardBounds.left - centerX) * scaleX
+  const cardY = cardBounds.top + offsetY
+  const cardWidth = cardBounds.width * scaleX
+  const cardHeight = cardBounds.height
+  const cardStyle = getComputedStyle(card)
+  const radius = Number.parseFloat(cardStyle.borderTopLeftRadius) || 0
+  const media = card.querySelector('img, video')
+  const mediaBounds = media?.getBoundingClientRect()
 
   context.save()
   context.beginPath()
   context.rect(0, y, viewportWidth, height)
   context.clip()
   context.beginPath()
-  context.roundRect(
-    cardX,
-    cardY,
-    cardWidth,
-    card.bounds.height,
-    card.radius * scaleX,
-  )
+  context.roundRect(cardX, cardY, cardWidth, cardHeight, radius * scaleX)
   context.clip()
-  context.globalAlpha = Math.min(1, strength * 1.65)
-
-  // The canvas is transparent outside the transformed card fragment. The DOM
-  // below remains visible, so the refraction never acts as a clipping mask.
-  context.fillStyle = card.background
-  context.fillRect(cardX, cardY, cardWidth, card.bounds.height)
+  context.fillStyle = cardStyle.backgroundColor
+  context.fillRect(cardX, cardY, cardWidth, cardHeight)
 
   if (
-    card.media &&
-    card.mediaBounds &&
-    isRenderableMedia(card.media)
+    media instanceof HTMLImageElement ||
+    media instanceof HTMLVideoElement
   ) {
-    const mediaX = centerX + (card.mediaBounds.left - centerX) * scaleX
-    const mediaY = card.mediaBounds.top + offsetY
-    const mediaWidth = card.mediaBounds.width * scaleX
+    if (mediaBounds && isRenderableMedia(media)) {
+      const mediaX = centerX + (mediaBounds.left - centerX) * scaleX
+      const mediaY = mediaBounds.top + offsetY
+      const mediaWidth = mediaBounds.width * scaleX
 
-    context.drawImage(
-      card.media,
-      mediaX,
-      mediaY,
-      mediaWidth,
-      card.mediaBounds.height,
-    )
+      context.drawImage(media, mediaX, mediaY, mediaWidth, mediaBounds.height)
+    }
   }
 
   context.restore()
 }
 
 /**
- * Transparent canvas overlay that subtly widens card content at the feed
- * boundaries. It redraws fragments only; no opaque backdrop is painted.
+ * Canvas bend derived from the reference: the untouched DOM remains
+ * interactive while a canvas redraws only the top and bottom edge strips
+ * with a non-linear horizontal expansion.
  */
 export const FeedEdgeBend = forwardRef<FeedEdgeBendHandle, FeedEdgeBendProps>(
   function FeedEdgeBend({ feedRef, cardRefs }, ref) {
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const frameRef = useRef<number | null>(null)
-    const paint = useCallback(() => {
-      const canvas = canvasRef.current
-      const feed = feedRef.current
-
-      if (!canvas || !feed) return
-
-      const bounds = feed.getBoundingClientRect()
-      const width = Math.round(bounds.width)
-      const height = Math.round(bounds.height)
-      const pixelRatio = window.devicePixelRatio || 1
-
-      if (
-        canvas.width !== width * pixelRatio ||
-        canvas.height !== height * pixelRatio
-      ) {
-        canvas.width = width * pixelRatio
-        canvas.height = height * pixelRatio
-        canvas.style.width = `${width}px`
-        canvas.style.height = `${height}px`
-      }
-
-      const context = canvas.getContext('2d')
-
-      if (!context) return
-
-      context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0)
-      context.clearRect(0, 0, width, height)
-
-      for (const card of cardRefs.current.values()) {
-        const snapshot = getCardSnapshot(card)
-
-        for (let y = 0; y < edgeDepth; y += stripHeight) {
-          drawCardStrip(context, snapshot, 'top', y, stripHeight, width, height)
-        }
-
-        for (let y = height - edgeDepth; y < height; y += stripHeight) {
-          drawCardStrip(
-            context,
-            snapshot,
-            'bottom',
-            y,
-            stripHeight,
-            width,
-            height,
-          )
-        }
-      }
-    }, [cardRefs, feedRef])
+    const [enabled, setEnabled] = useState(false)
 
     const redraw = useCallback(() => {
       if (frameRef.current !== null) return
 
       frameRef.current = requestAnimationFrame(() => {
         frameRef.current = null
-        paint()
+
+        const canvas = canvasRef.current
+        const feed = feedRef.current
+
+        if (!canvas || !feed) return
+
+        const bounds = feed.getBoundingClientRect()
+        const width = Math.round(bounds.width)
+        const height = Math.round(bounds.height)
+        const pixelRatio = window.devicePixelRatio || 1
+
+        if (canvas.width !== width * pixelRatio || canvas.height !== height * pixelRatio) {
+          canvas.width = width * pixelRatio
+          canvas.height = height * pixelRatio
+          canvas.style.width = `${width}px`
+          canvas.style.height = `${height}px`
+        }
+
+        const context = canvas.getContext('2d')
+
+        if (!context) return
+
+        context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0)
+        context.clearRect(0, 0, width, height)
+        context.fillStyle = '#fff'
+        context.fillRect(0, 0, width, edgeDepth)
+        context.fillRect(0, height - edgeDepth, width, edgeDepth)
+
+        for (const card of cardRefs.current.values()) {
+          for (let y = 0; y < edgeDepth; y += stripHeight) {
+            drawCardStrip(context, card, 'top', y, stripHeight, width, height)
+          }
+
+          for (
+            let y = height - edgeDepth;
+            y < height;
+            y += stripHeight
+          ) {
+            drawCardStrip(context, card, 'bottom', y, stripHeight, width, height)
+          }
+        }
       })
-    }, [paint])
+    }, [cardRefs, feedRef])
 
     useImperativeHandle(ref, () => ({ redraw }), [redraw])
 
-    useLayoutEffect(() => {
-      paint()
-    }, [paint])
+    useEffect(() => {
+      const finePointer = window.matchMedia('(pointer: fine)')
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
+      const updateEnabled = () => {
+        setEnabled(finePointer.matches && !reducedMotion.matches)
+      }
+
+      updateEnabled()
+      finePointer.addEventListener('change', updateEnabled)
+      reducedMotion.addEventListener('change', updateEnabled)
+
+      return () => {
+        finePointer.removeEventListener('change', updateEnabled)
+        reducedMotion.removeEventListener('change', updateEnabled)
+      }
+    }, [])
 
     useEffect(() => {
+      if (!enabled) return
+
       const feed = feedRef.current
       const observer = new ResizeObserver(redraw)
       const media = Array.from(
@@ -202,27 +174,25 @@ export const FeedEdgeBend = forwardRef<FeedEdgeBendHandle, FeedEdgeBendProps>(
       media.forEach((element) => {
         element.addEventListener('load', redraw)
         element.addEventListener('loadeddata', redraw)
-
-        if (isRenderableMedia(element)) redraw()
       })
-      const delayedRedraw = window.setTimeout(redraw, 250)
       redraw()
 
       return () => {
         observer.disconnect()
-        window.clearTimeout(delayedRedraw)
         media.forEach((element) => {
           element.removeEventListener('load', redraw)
           element.removeEventListener('loadeddata', redraw)
         })
       }
-    }, [feedRef, redraw])
+    }, [enabled, feedRef, redraw])
 
     useEffect(() => {
       return () => {
         if (frameRef.current !== null) cancelAnimationFrame(frameRef.current)
       }
     }, [])
+
+    if (!enabled) return null
 
     return <canvas ref={canvasRef} className="feed-edge-bend" aria-hidden="true" />
   },
