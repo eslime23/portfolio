@@ -74,6 +74,42 @@ a {
   letter-spacing: -0.04em;
 }
 
+.header-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.blur-toggle {
+  min-width: 40px;
+  min-height: 40px;
+  margin-top: 4px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 160ms var(--ease-out), transform 160ms var(--ease-out);
+}
+
+.blur-toggle[aria-pressed='false'] {
+  opacity: 0.42;
+}
+
+.blur-toggle:active {
+  transform: scale(0.96);
+}
+
+.blur-toggle:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 2px;
+}
+
 @keyframes intro-text-reveal {
   from {
     opacity: 0;

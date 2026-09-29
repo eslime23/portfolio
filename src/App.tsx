@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { CardFeed } from './cards/CardFeed'
 import { GradualBlur } from './components/GradualBlur'
 import { getPublishedCards } from './cards/registry'
@@ -16,12 +17,18 @@ const feedBlurProps = {
 }
 
 export function App() {
+  const [isFeedBlurEnabled, setIsFeedBlurEnabled] = useState(true)
+
   return (
     <main className="portfolio-shell">
       <div className="feed-stage">
         <CardFeed cards={designCards} label="Design projects" />
-        <GradualBlur {...feedBlurProps} position="top" />
-        <GradualBlur {...feedBlurProps} position="bottom" />
+        {isFeedBlurEnabled ? (
+          <>
+            <GradualBlur {...feedBlurProps} position="top" />
+            <GradualBlur {...feedBlurProps} position="bottom" />
+          </>
+        ) : null}
       </div>
 
       <div className="portfolio-ui">
@@ -33,7 +40,18 @@ export function App() {
             </p>
           </div>
 
-          <p className="telegram-label intro-text intro-text--3">Telegram</p>
+          <div className="header-controls">
+            <p className="telegram-label intro-text intro-text--3">Telegram</p>
+            <button
+              className="blur-toggle"
+              type="button"
+              aria-pressed={isFeedBlurEnabled}
+              aria-label={isFeedBlurEnabled ? 'Disable feed blur' : 'Enable feed blur'}
+              onClick={() => setIsFeedBlurEnabled((enabled) => !enabled)}
+            >
+              Blur
+            </button>
+          </div>
         </header>
 
         <nav className="section-toggle" aria-label="Portfolio sections">
