@@ -122,9 +122,6 @@ export const FeedEdgeBend = forwardRef<FeedEdgeBendHandle, FeedEdgeBendProps>(
 
         context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0)
         context.clearRect(0, 0, width, height)
-        context.fillStyle = '#fff'
-        context.fillRect(0, 0, width, edgeDepth)
-        context.fillRect(0, height - edgeDepth, width, edgeDepth)
 
         for (const card of cardRefs.current.values()) {
           for (let y = 0; y < edgeDepth; y += stripHeight) {
