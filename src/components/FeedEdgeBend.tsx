@@ -19,7 +19,7 @@ interface FeedEdgeBendProps {
 
 type Edge = 'top' | 'bottom'
 
-const edgeDepth = 88
+const edgeDepth = 100
 const stripHeight = 2
 
 function isRenderableMedia(element: HTMLImageElement | HTMLVideoElement) {
